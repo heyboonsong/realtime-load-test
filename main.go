@@ -7,13 +7,23 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 
 func main() {
 	r := gin.Default()
 
 	r.GET("/polling", polling)
 	r.GET("/sse", sse)
+	r.GET("/ws", ws)
 
 	r.Run("0.0.0.0:9000")
 }
@@ -38,6 +48,34 @@ func sse(c *gin.Context) {
 			break
 		}
 		c.Writer.Flush()
+		time.Sleep(1 * time.Second)
+	}
+}
+
+func ws(c *gin.Context) {
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Println("WebSocket upgrade failed:", err)
+		return
+	}
+
+	defer conn.Close()
+
+	for {
+		message := fmt.Sprintf("WebSocket message: %s", time.Now().Format(time.RFC3339))
+
+		err := conn.WriteMessage(websocket.TextMessage, []byte(message))
+		if err != nil {
+			log.Println("WebSocket write error:", err)
+			break
+		}
+
+		_, _, err = conn.ReadMessage()
+		if err != nil {
+			log.Println("WebSocket read error:", err)
+			break
+		}
+
 		time.Sleep(1 * time.Second)
 	}
 }
