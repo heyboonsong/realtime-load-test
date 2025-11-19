@@ -12,22 +12,6 @@
             reservations:
               cpus: '0.25'
               memory: 128M
-      # k6-polling:
-      #   image: grafana/k6:latest
-      #   platform: linux/amd64
-      #   depends_on:
-      #     - app
-      #   volumes:
-      #     - ./polling.js:/scripts/polling.js
-      #   command: run  --vus 10000 --duration 30s /scripts/polling.js
-      k6-sse:
-        image: grafana/k6:latest
-        platform: linux/amd64
-        depends_on:
-          - app
-        volumes:
-          - ./sse.js:/scripts/sse.js
-        command: run  --vus 10000 --duration 30s /scripts/sse.js
       cadvisor:
         image: gcr.io/cadvisor/cadvisor:latest
         hostname: cadvisor

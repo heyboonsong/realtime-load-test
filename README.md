@@ -27,25 +27,37 @@ This will start the Go application on port 9000, along with a cAdvisor instance 
 
 ## Running Load Tests
 
-### Server-Sent Events (SSE) Load Test
+### Running All Load Tests
 
-An SSE load test is included in the `docker-compose.yml` file. To run it:
-
-```bash
-docker-compose up --scale k6-sse=1
-```
-
-This will start a k6 instance that runs the SSE load test (`sse.js`) with 10,000 VUs for 30 seconds.
-
-### WebSocket Load Test
-
-To run the WebSocket load test locally, first ensure the application is running (`docker-compose up -d`), then execute:
+A convenience script is provided to run all load tests sequentially:
 
 ```bash
-k6 run --vus 10 --duration 30s ws-load-test.js
+./run-all-tests.sh
 ```
 
-This command will run the WebSocket load test (`ws-load-test.js`) with 10 virtual users for 30 seconds against the `ws://localhost:9000/ws` endpoint.
+This script will:
+1.  Start the application using `docker-compose up -d`.
+2.  Run the Polling, SSE, and WebSocket load tests.
+3.  Stop the application using `docker-compose down`.
+
+### Running Individual Load Tests
+
+To run a specific load test, first ensure the application is running (`docker-compose up -d`), then execute one of the following commands:
+
+**Polling Load Test:**
+```bash
+k6 run --vus 100 --duration 30s polling.js
+```
+
+**Server-Sent Events (SSE) Load Test:**
+```bash
+k6 run --vus 100 --duration 30s sse.js
+```
+
+**WebSocket Load Test:**
+```bash
+k6 run --vus 100 --duration 30s ws-load-test.js
+```
 
 ## Monitoring
 
